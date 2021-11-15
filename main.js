@@ -1,13 +1,17 @@
 // IMPORTS
 const nodemailer = require('nodemailer');
 const axios = require("axios").default;
+const cron = require('node-cron');
 require('dotenv').config();
 
 // GLOBAL variables
-var stocks, options;
+var stocks, values; 
+var options;
 var transporter
 
-stocks = ['AAPL', 'VOO', 'KD', 'VHT', 'TFI'];
+stocks = ['KD', 'VHT'];
+values = [259.59,24.34];
+
 
 options = {
   method: 'GET',
@@ -28,22 +32,27 @@ transporter = nodemailer.createTransport({
 });
 
 // STILL DECIDING ON BEST WAY TO FORMAT EMAIL
-function sendEmail(element){
-    
-    var mailOptions = {
-        from: process.env.EMAIL_ADDRESS,
-        to: process.env.EMAIL_DESTINATION,
-        subject: `Stock Alert: ${element.symbol} is ${element.bid}`,
-        text: ''
-        };
-        
-    transporter.sendMail(mailOptions, (error, info)=>{
-        if (error) {
-            console.log(error);
-        } else {
-            console.log('Email sent: ' + info.response);
+function sendEmail(data){
+    //console.log(data)
+    data.forEach(element=>{
+        //console.log(`${element[0].bid} ${element[1]}`)
+        if (element[0].bid > element[1]){
+            var mailOptions = {
+                from: process.env.EMAIL_ADDRESS,
+                to: process.env.EMAIL_DESTINATION,
+                subject: `Sell ${element[0].symbol}: ${element[0].bid}`,
+                text: ''
+                };
+                
+            transporter.sendMail(mailOptions, (error, info)=>{
+                if (error) {
+                    console.log(error);
+                } else {
+                    console.log('Email sent: ' + info.response);
+                }
+            });
         }
-    });
+    })
 }
 
 const zip = (...arr) => {
@@ -70,10 +79,30 @@ function main(){
         stock_data.forEach(element => {
             console.log(`(${element.symbol})\t${element.bid}\t${element.shortName} `)  
         });
+        sendEmail(zip(stock_data,values))
 
     }).catch(function (error) {
         console.error(error);
     });
 }
 
+// RUN PROGRAM 
 main();
+
+/*
+cron.schedule('* * * * *', function() {
+    var currentdate = new Date(); 
+    var datetime = "Check: " + currentdate.getDate() + "/"
+                + (currentdate.getMonth()+1)  + "/" 
+                + currentdate.getFullYear() + " @ "  
+                + currentdate.getHours() + ":"  
+                + currentdate.getMinutes() + ":" 
+                + currentdate.getSeconds();
+    //console.log(datetime)
+    main();
+});*/
+/*
+cron.schedule('0 10-3 * * mon,tue,wed,thu,fri', function() {
+    main();
+});
+*/
