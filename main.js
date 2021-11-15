@@ -9,8 +9,8 @@ var stocks, values;
 var options;
 var transporter
 
-stocks = ['KD', 'VHT'];
-values = [259.59,24.34];
+stocks = [ 'VHT','KD', 'DVYE','GOGL', 'VOO'];
+values = [259.59,24.34,38.66,8.52,422.45];
 
 
 options = {
@@ -35,22 +35,22 @@ transporter = nodemailer.createTransport({
 function sendEmail(data){
     //console.log(data)
     data.forEach(element=>{
-        //console.log(`${element[0].bid} ${element[1]}`)
-        if (element[0].bid > element[1]){
+        console.log(`${element[0].symbol}\t${element[0].bid}\t ${element[1]}\t ${element[0].bid > element[1]*1.01 ? 'profit':'loss'}`)
+        if (element[0].bid > element[1]*1.00){
             var mailOptions = {
                 from: process.env.EMAIL_ADDRESS,
                 to: process.env.EMAIL_DESTINATION,
                 subject: `Sell ${element[0].symbol}: ${element[0].bid}`,
                 text: ''
                 };
-                
+            /*    
             transporter.sendMail(mailOptions, (error, info)=>{
                 if (error) {
                     console.log(error);
                 } else {
                     console.log('Email sent: ' + info.response);
                 }
-            });
+            });*/
         }
     })
 }
@@ -76,9 +76,10 @@ function main(){
         //console.log(response.data.quoteResponse);
         var stock_data = response.data.quoteResponse.result;
         //Print what we want
+        /*
         stock_data.forEach(element => {
             console.log(`(${element.symbol})\t${element.bid}\t${element.shortName} `)  
-        });
+        });*/
         sendEmail(zip(stock_data,values))
 
     }).catch(function (error) {
@@ -101,8 +102,7 @@ cron.schedule('* * * * *', function() {
     //console.log(datetime)
     main();
 });*/
-/*
-cron.schedule('0 10-3 * * mon,tue,wed,thu,fri', function() {
+
+cron.schedule('*/15 10-15 * * mon,tue,wed,thu,fri', function() {
     main();
 });
-*/
