@@ -7,12 +7,12 @@ require('dotenv').config();
 var stocks, options;
 var transporter
 
-stocks = 'AAPL, VOO, KD';
+stocks = ['AAPL', 'VOO', 'KD', 'VHT', 'TFI'];
 
 options = {
   method: 'GET',
   url: process.env.RAPID_URL,
-  params: {region: 'US', symbols: stocks},
+  params: {region: 'US', symbols: stocks.join(',')},
   headers: {
     'x-rapidapi-host': process.env.RAPID_HOST,
     'x-rapidapi-key': process.env.RAPID_KEY
@@ -46,14 +46,31 @@ function sendEmail(element){
     });
 }
 
+const zip = (...arr) => {
+    const zipped = [];
+    arr.forEach((element, ind) => {
+       element.forEach((el, index) => {
+          if(!zipped[index]){
+             zipped[index] = [];
+          };
+          if(!zipped[index][ind]){
+             zipped[index][ind] = [];
+          }
+          zipped[index][ind] = el || '';
+       })
+    });
+    return zipped;
+ };
+
 function main(){
     axios.request(options).then(function (response) {
         //console.log(response.data.quoteResponse);
-        var stocks = response.data.quoteResponse.result;
+        var stock_data = response.data.quoteResponse.result;
         //Print what we want
-        stocks.forEach(element => {
-            console.log(`(${element.symbol})\t${element.shortName}: ${element.bid}`)  
+        stock_data.forEach(element => {
+            console.log(`(${element.symbol})\t${element.bid}\t${element.shortName} `)  
         });
+
     }).catch(function (error) {
         console.error(error);
     });
