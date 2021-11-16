@@ -34,8 +34,12 @@ transporter = nodemailer.createTransport({
 // STILL DECIDING ON BEST WAY TO FORMAT EMAIL
 function sendEmail(data){
     //console.log(data)
+    console.log('\x1b[36m sometext \x1b[0m');
     data.forEach(element=>{
-        console.log(`${element[0].symbol}\t${element[0].bid}\t ${element[1]}\t ${element[0].bid > element[1]*1.01 ? 'profit':'loss'}`)
+        var loss = ((element[0].bid-element[1])*100/element[1]).toFixed(2);
+        console.log(
+            `${element[0].symbol}\t${element[0].bid}\t${element[1]}\t${element[0].bid > element[1]*1.01 ? '\x1b[32mprofit\x1b[0m':'\x1b[31mloss\x1b[0m'}\t${loss}%`
+        )
         if (element[0].bid > element[1]*1.00){
             var mailOptions = {
                 from: process.env.EMAIL_ADDRESS,
@@ -43,14 +47,14 @@ function sendEmail(data){
                 subject: `Sell ${element[0].symbol}: ${element[0].bid}`,
                 text: ''
                 };
-            /*    
+                
             transporter.sendMail(mailOptions, (error, info)=>{
                 if (error) {
                     console.log(error);
                 } else {
                     console.log('Email sent: ' + info.response);
                 }
-            });*/
+            });
         }
     })
 }
